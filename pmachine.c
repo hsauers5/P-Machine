@@ -10,6 +10,9 @@ int stack[MAX_DATA_STACK_HEIGHT];
 int lex[MAX_LEXI_LEVEL];
 int code[MAX_CODE_LENGTH];
 
+// strangely: if halt is false then program should halt, else continue
+int halt = -1;
+
 // registers
 int PC = 0;
 int IR = 0;
@@ -130,7 +133,7 @@ int OPT(int zero, int M) {
             break;
         case 6:
             // ODD
-            // I cannot make sense of this pseudocode. 
+            // @TODO: I cannot make sense of this pseudocode. 
             // stack[sp] = stack[sp] mod 2) or ord(odd(stack[sp]))
             break;
         case 7:
@@ -191,61 +194,127 @@ int STO(int L, int M) {
     }
 }
 
+int CAL(int L, int M) {
+    if (SP - 4 <= GP) {
+        printf("Stack overflow error!");
+        return;
+    }
+    stack[SP - 1] = 0;
+    stack[SP - 2] = base(L, BP);
+    stack[SP - 3] = BP;
+    stack[SP - 4] = PC;
+    BP = SP - 1;
+    PC = M;
+}
+
+int INC(int zero, int M) {
+    if (SP - M <= GP) {
+        printf("Stack overflow error!");
+        return;
+    }
+    if (BP == 0) {
+        GP = GP + M;
+    } else {
+        SP = SP - M;
+    }
+}
+
+int JMP(int zero, int M) {
+    PC = M;
+}
+
+int JPC(int zero, int M) {
+    if (stack[SP] == 0) {
+        PC = M;
+    }
+    SP += 1;
+}
+
+int SIO(int zero, int M) {
+    switch(M) {
+        case 1:
+            printf("%d", stack[SP]);
+            SP += 1;
+            break;
+        case 2:
+            SP -= 1;
+            // read user input into stack
+            printf("Enter integer to push to stack: ");
+            scanf("%d", &stack[SP]);
+            break;
+        case 3:
+            halt = 0;
+    }
+}
+
 // ISA
-int do_operation(int operation) {
+int do_operation(instruction * instr) {
+    int M = instr -> M;
+    int L = instr -> L;
+    int operation = instr -> op;
     switch(operation) {
         case 01:
             // LIT, 0, M
             // Push literal M onto data or stack
+            LIT(0, M);
             break;
         case 02:
             // OPR, 0, M
             // Operation to be performed on the data at the top of the stack
+            OPR(0, M);
             break;
         case 03:
             // LOD, L, M
             // Load value to top of stack from the stack location at offset M from L lexicographical levels down
-            // ??
+            LOD(L, M);
             break;
         case 04: 
             // STO, L, M
             // Store value at top of stack in the stack location at offset M from L lexi levels down
+            STO(L, M);
             break;
         case 05:
             // CAL, L, M
             // Call procedure at code index M
             // Generate new activation record and pc <- M
+            CAL(L, M);
             break;
         case 06:
             // INC 0, M
             // Allocate M locals, increment SP by M. 
             // First 3 are Static Link (SL), Dynamic Link (DL), and return address (RA)
+            INC(0, M);
             break;
         case 07:
             // JMP 0, M
             // Jump to instruction M
+            JMP(0, M);
             break;
         case 8:
             // JPC 0, M
             // Jump to instruction M if top stack element == 0
+            JPC(0, M);
             break;
         case 9:
             // SIO 0, 1
             // Write top of stack to screen
             // pop? peek? who knows
+            SIO(0, 1)
             break;
         case 10:
             // SIO 0, 2
             // Read in input from user and store at top of stack
-            // Input safety? Format? 
+            SIO(0, 2);
             break;
         case 11: 
             // SIO 0, 3
-            // End of program. 
-            exit(0);
+            // End of program: halt condition
+            SIO(0, 3)
             break;
     }
 }
+
+// @TODO write a control method
 
 int main(void) {
     printf("AAA");
