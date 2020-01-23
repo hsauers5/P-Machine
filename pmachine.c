@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_DATA-STACK_HEIGHT 23
+#define MAX_DATA_STACK_HEIGHT 23
 #define MAX_CODE_LENGTH 500
 #define MAX_LEXI_LEVEL 3
 
@@ -197,7 +197,7 @@ int STO(int L, int M) {
 int CAL(int L, int M) {
     if (SP - 4 <= GP) {
         printf("Stack overflow error!");
-        return;
+        return 0;
     }
     stack[SP - 1] = 0;
     stack[SP - 2] = base(L, BP);
@@ -210,7 +210,7 @@ int CAL(int L, int M) {
 int INC(int zero, int M) {
     if (SP - M <= GP) {
         printf("Stack overflow error!");
-        return;
+        return 0;
     }
     if (BP == 0) {
         GP = GP + M;
@@ -249,8 +249,8 @@ int SIO(int zero, int M) {
 
 // ISA
 int do_operation(instruction * instr) {
-    int M = instr -> M;
-    int L = instr -> L;
+    int M = instr -> m;
+    int L = instr -> l;
     int operation = instr -> op;
     switch(operation) {
         case 01:
@@ -299,7 +299,7 @@ int do_operation(instruction * instr) {
             // SIO 0, 1
             // Write top of stack to screen
             // pop? peek? who knows
-            SIO(0, 1)
+            SIO(0, 1);
             break;
         case 10:
             // SIO 0, 2
@@ -309,7 +309,7 @@ int do_operation(instruction * instr) {
         case 11: 
             // SIO 0, 3
             // End of program: halt condition
-            SIO(0, 3)
+            SIO(0, 3);
             break;
     }
 }
@@ -319,3 +319,4 @@ int do_operation(instruction * instr) {
 int main(void) {
     printf("AAA");
 }
+
