@@ -135,6 +135,7 @@ int OPT(int zero, int M) {
             // ODD
             // @TODO: I cannot make sense of this pseudocode. 
             // stack[sp] = stack[sp] mod 2) or ord(odd(stack[sp]))
+            //     it may be just: stack[SP] = stack[SP] % 2;
             break;
         case 7:
             // MOD
@@ -314,7 +315,7 @@ int do_operation(instruction * instr) {
     }
 }
 
-// @TODO write a control method
+// @TODO write a control method and handle input
 
 int main(void) {
     printf("AAA");
