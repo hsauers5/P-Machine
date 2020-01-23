@@ -10,6 +10,8 @@ int stack[MAX_DATA-STACK_HEIGHT];
 int lex[MAX_LEXI_LEVEL];
 int code[MAX_CODE_LENGTH];
 
+/* Begin Stack */
+/* ===========================================*/
 int stack_top = -1;
 
 int stack_is_empty(void) {
@@ -52,6 +54,30 @@ int stack_push(int data) {
         return 0;
     }
 }
+
+/* End Stack */
+/* ===========================================*/
+
+
+/* Begin P-Machine */
+typedef struct {
+   int op;
+   int l;
+   int m;
+}instruction;
+
+/* find base L levels down */
+// l stand for L in the instruction format
+int base(int l, int base) {  
+  int b1; 
+  b1 = base; 
+  while (l > 0) {
+    b1 = stack[b1 - 1];
+    l--;
+  }
+  return b1;
+}
+
 
 
 int main(void) {
