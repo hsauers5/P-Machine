@@ -137,7 +137,7 @@ int OPT(int zero, int M) {
             // ODD
             // @TODO: I cannot make sense of this pseudocode. 
             // stack[sp] = stack[sp] mod 2) or ord(odd(stack[sp]))
-            //     it may be just: stack[SP] = stack[SP] % 2;
+          	stack[SP] = stack[SP] % 2;
             break;
         case 7:
             // MOD
@@ -320,6 +320,17 @@ int do_operation(instruction * instr) {
 // @TODO write a control method and handle input
 
 int main(void) {
-    printf("AAA");
+    // make a scanner for input
+	// throw it all into a text array
+	// while we're reading in we can translate the instrustions and output them?
+	// or maybe just make a function after the fact that loops through the text array
+	
+	// use said text array for the mega-while loop
+
+	// while in the mega loop, everything needs to call a function that updates the output file stack
+	// speaking of there needs to be a file pointer (prob the same one at this point) that
+	// writes to an output file
+
+	
 }
 
