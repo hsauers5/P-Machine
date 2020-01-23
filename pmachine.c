@@ -12,10 +12,11 @@ int code[MAX_CODE_LENGTH];
 
 /* Begin Stack */
 /* ===========================================*/
-int stack_top = -1;
+int BP = 0; // base pointer
+int SP = MAX_DATA-STACK_HEIGHT; // stack pointer
 
 int stack_is_empty(void) {
-    if (stack_top == -1) {
+    if (SP == MAX_DATA-STACK_HEIGHT) {
         return 1;
     } else {
         return 0;
@@ -23,7 +24,7 @@ int stack_is_empty(void) {
 }
 
 int stack_is_full(void) {
-    if (stack_top == MAX_DATA-STACK_HEIGHT) {
+    if (SP == BP) {
         return 1;
     } else {
         return 0;
@@ -31,13 +32,13 @@ int stack_is_full(void) {
 }
 
 int stack_peek(void) {
-    return stack[stack_top];
+    return stack[SP];
 }
 
 int stack_pop(void) {
     if (!stack_is_empty()) {
-        int tmp = stack[stack_top];
-        stack_top -= 1;
+        int tmp = stack[SP];
+        SP += 1;
         return tmp;
     } else {
         printf("Stack is empty!");
@@ -46,8 +47,8 @@ int stack_pop(void) {
 
 int stack_push(int data) {
     if (!stack_is_full()) {
-        top += 1;
-        stack[stack_top] = data;
+        SP -= 1;
+        stack[SP] = data;
         return 1;
     } else {
         printf("Stack is full!");
@@ -60,6 +61,12 @@ int stack_push(int data) {
 
 
 /* Begin P-Machine */
+
+int PC = 0;
+int IR = 0;
+int GP = -1;
+
+// instruction format from file is {OP LEVEL M} space-separated.
 typedef struct {
    int op;
    int l;
@@ -79,6 +86,11 @@ int base(int l, int base) {
 }
 
 
+int do_operation(instruction * inst) {
+    switch(inst->op) {
+        
+    }
+}
 
 int main(void) {
     printf("AAA");
