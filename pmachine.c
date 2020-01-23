@@ -8,7 +8,8 @@
 
 int stack[MAX_DATA_STACK_HEIGHT];
 int lex[MAX_LEXI_LEVEL];
-int code[MAX_CODE_LENGTH];
+int code[MAX_CODE_LENGTH];	// pretty sure this needs to be an instruction pointer array
+
 
 // strangely: if halt is false then program should halt, else continue
 int halt = -1;
@@ -69,7 +70,7 @@ int stack_push(int data) {
 
 /* Begin P-Machine */
 // instruction format from file is {OP LEVEL M} space-separated.
-typedef struct {
+typedef struct instruction {
    int op;
    int l;
    int m;
@@ -99,7 +100,7 @@ int LIT(int zero, int M) {
 
 // OPR
 // M determines operation to perform
-int OPT(int zero, int M) {
+int OPR(int zero, int M) {
     switch(M) {
         case 0:
             // RET
@@ -317,18 +318,45 @@ int do_operation(instruction * instr) {
 
 // @TODO write a control method and handle input
 
+int read_in(FILE * fp, instruction * text) {
+	int lines_of_text = 0;
+	while (fscanf(fp, "%d %d %d", &text[lines_of_text].op, &text[lines_of_text].l, &text[lines_of_text].m) != EOF) {
+		lines_of_text++;
+	}
+	
+	return lines_of_text;
+}
+
 int main(void) {
-    // make a scanner for input
-	// throw it all into a text array
+	FILE *in_file = fopen("input.txt", "r");
+	FILE *out_file = fopen("output.txt", "w");
+	instruction * text = (instruction *)calloc(MAX_CODE_LENGTH, sizeof(instruction));
+	int lines_of_text;
+
+	if (in_file == NULL || out_file == NULL) {
+		printf("Error: Could not locate file(s).\n");
+		exit(-1);
+	}
+
+	// record number of operations while reading from input.txt
+	lines_of_text = read_in(in_file, text);
+
 	// while we're reading in we can translate the instrustions and output them?
 	// or maybe just make a function after the fact that loops through the text array
-	
+	int i;
+	for (i = 0; i < lines_of_text; i++) {
+		fprintf(out_file, " %d %d %d\n", text[i].op, text[i].l, text[i].m);
+	}
+
 	// use said text array for the mega-while loop
 
 	// while in the mega loop, everything needs to call a function that updates the output file stack
 	// speaking of there needs to be a file pointer (prob the same one at this point) that
 	// writes to an output file
-
 	
+	fclose(in_file);
+	fclose(out_file);
+	free(text);
+	return 0;
 }
 
