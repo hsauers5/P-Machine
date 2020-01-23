@@ -6,7 +6,7 @@
 #define MAX_CODE_LENGTH 500
 #define MAX_LEXI_LEVEL 3
 
-int stack[MAX_DATA-STACK_HEIGHT];
+int stack[MAX_DATA_STACK_HEIGHT];
 int lex[MAX_LEXI_LEVEL];
 int code[MAX_CODE_LENGTH];
 
@@ -19,10 +19,10 @@ int GP = -1;
 /* ===========================================*/
 // these are also registers
 int BP = 0; // base pointer
-int SP = MAX_DATA-STACK_HEIGHT; // stack pointer
+int SP = MAX_DATA_STACK_HEIGHT; // stack pointer
 
 int stack_is_empty(void) {
-    if (SP == MAX_DATA-STACK_HEIGHT) {
+    if (SP == MAX_DATA_STACK_HEIGHT) {
         return 1;
     } else {
         return 0;
@@ -84,7 +84,114 @@ int base(int l, int base) {
   return b1;
 }
 
+// LIT
+int LIT(int zero, int M) {
+    if (BP == 0) {
+        stack_push(M);
+    } else {
+        SP -= 1;
+        stack[SP] = M;
+    }
+}
 
+// OPR
+// M determines operation to perform
+int OPT(int zero, int M) {
+    switch(M) {
+        case 0:
+            // RET
+            SP = BP + 1;
+            BP = stack[SP - 3];
+            PC = stack[SP - 4];
+            break;
+        case 1:
+            // NEG
+            stack[SP] = -stack[SP];
+            break;
+        case 2:
+            // ADD
+            SP += 1;
+            stack[SP] = stack[SP] + stack[SP - 1];
+            break;
+        case 3: 
+            // SUB
+            SP += 1;
+            stack[SP] = stack[SP] - stack[SP - 1];
+            break;
+        case 4:
+            // MUL
+            SP += 1;
+            stack[SP] = stack[SP] * stack[SP - 1];
+            break;
+        case 5:
+            // DIV
+            SP += 1;
+            stack[SP] = stack[SP] / stack[SP - 1];
+            break;
+        case 6:
+            // ODD
+            // I cannot make sense of this pseudocode. 
+            // stack[sp] = stack[sp] mod 2) or ord(odd(stack[sp]))
+            break;
+        case 7:
+            // MOD
+            SP += 1;
+            stack[SP] = stack[SP] % stack[SP - 1];
+            break;
+        case 8:
+            // EQL
+            SP += 1;
+            stack[SP] = stack[SP] == stack[SP - 1];
+            break;
+        case 9:
+            // NEQ
+            SP += 1;
+            stack[SP] = stack[SP] != stack[SP - 1];
+            break;
+        case 10:
+            // LSS
+            SP += 1;
+            stack[SP] = stack[SP] < stack[SP - 1];
+            break;
+        case 11:
+            // LEQ
+            SP += 1;
+            stack[SP] = stack[SP] <= stack[SP - 1];
+            break;
+        case 12:
+            // GTR
+            SP += 1;
+            stack[SP] = stack[SP] > stack[SP - 1];
+            break;
+        case 13:
+            // GEQ
+            SP += 1;
+            stack[SP] = stack[SP] >= stack[SP - 1];
+            break;
+    }
+}
+
+int LOD(int L, int M) {
+    if (base(L, BP) == 0) {
+        GP += 1;
+        stack[GP] = stack[base(L, BP) + M];
+    } else {
+        SP -= 1;
+        stack[SP] = stack[base(L, BP) - M];
+    }
+}
+
+int STO(int L, int M) {
+    if (base(L, BP) == 0) {
+        stack[base(L, BP) + M] = stack[GP];
+        GP -= 1;
+    } else {
+        stack[base(L, BP) - M] = stack[SP];
+        SP += 1;
+    }
+}
+
+// ISA
 int do_operation(int operation) {
     switch(operation) {
         case 01:
