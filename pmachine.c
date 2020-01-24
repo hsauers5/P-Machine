@@ -10,6 +10,9 @@ int stack[MAX_DATA_STACK_HEIGHT];
 int lex[MAX_LEXI_LEVEL];
 int code[MAX_CODE_LENGTH];	// pretty sure this needs to be an instruction pointer array
 
+// output mega strings (might go 2-d later on)
+char * output_one = {"Line\tOP\tL\tM\n"};
+char * output_two = {"\t\t\tgp\tpc\tbp\tsp\tdata\t\t\tstack\nInitial values\t\n"};
 
 // strangely: if halt is false then program should halt, else continue
 int halt = -1;
@@ -327,35 +330,49 @@ int read_in(FILE * fp, instruction * text) {
 	return lines_of_text;
 }
 
-int main(void) {
-	FILE *in_file = fopen("input.txt", "r");
-	FILE *out_file = fopen("output.txt", "w");
-	instruction * text = (instruction *)calloc(MAX_CODE_LENGTH, sizeof(instruction));
-	int lines_of_text;
+char * dynamic_strcat(char * base, char * added) {
+	// resize the base String
+	char * conjoined = (char *)malloc(strlen(base) + strlen(added) + 1);
 
-	if (in_file == NULL || out_file == NULL) {
-		printf("Error: Could not locate file(s).\n");
+	if (conjoined == NULL) {
+		printf("Error: failed to create char array.\n");
+		return NULL;
+	}
+
+	// strcat and go
+	strcpy(conjoined, base);
+
+	return strcat(conjoined, added);
+}
+
+int main(void) {
+	FILE *fp = fopen("input.txt", "r");
+	instruction * text = (instruction *)calloc(MAX_CODE_LENGTH, sizeof(instruction));
+	char line_index[4];
+	int lines_of_text;
+	int i;
+
+	if (fp == NULL) {
+		printf("Error: Could not locate file.\n");
 		exit(-1);
 	}
 
 	// record number of operations while reading from input.txt
-	lines_of_text = read_in(in_file, text);
-
-	// while we're reading in we can translate the instrustions and output them?
-	// or maybe just make a function after the fact that loops through the text array
-	int i;
-	for (i = 0; i < lines_of_text; i++) {
-		fprintf(out_file, " %d %d %d\n", text[i].op, text[i].l, text[i].m);
-	}
-
+	lines_of_text = read_in(fp, text);
+/*
 	// use said text array for the mega-while loop
+	sprintf(line_index, "%d\t", i);
+	for (i = 0; i < lines_of_text; i++) {
+		output_one = dynamic_strcat(output_one, line_index);
+		do_operation(text[i]);
+	}
+*/
+	// write the strings to the output file		
+	fclose(fp);
+	fp = fopen("output.txt", "w");
+	fprintf(fp, "%s\n%s", output_one, output_two);
 
-	// while in the mega loop, everything needs to call a function that updates the output file stack
-	// speaking of there needs to be a file pointer (prob the same one at this point) that
-	// writes to an output file
-	
-	fclose(in_file);
-	fclose(out_file);
+	fclose(fp);
 	free(text);
 	return 0;
 }
