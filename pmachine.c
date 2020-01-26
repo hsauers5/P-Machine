@@ -11,11 +11,13 @@
 int stack[MAX_DATA_STACK_HEIGHT];
 
 int lex[MAX_LEXI_LEVEL];
-int code[MAX_CODE_LENGTH];	// pretty sure this needs to be an instruction pointer array
+int code[MAX_CODE_LENGTH];	// pretty sure this needs to be an instruction pointer array		|| obsolete as well.
 
 // output mega strings (might go 2-d later on)
-char * output_one = {"Line\tOP\tL\tM\n"};
+char * output_one = {"Line\tOP\tR\tL\tM\n"};
 char * output_two = {"\t\t\tgp\tpc\tbp\tsp\tdata\t\t\tstack\nInitial values\t\n"};
+
+void update_output_one(char * OP, int R, int L, int M);
 
 // strangely: if halt is false then program should halt, else continue
 int halt = -1;
@@ -307,73 +309,85 @@ int SIO(int R, int zero, int M) {
 }
 
 // ISA
-int do_operation(instruction * instr) {
-    int M = instr -> m;
-    int L = instr -> l;
-    int operation = instr -> op;
-    int R = instr -> reg;
+int do_operation(instruction instr) {
+    int M = instr.m;
+    int L = instr.l;
+    int operation = instr.op;
+    int R = instr.reg;
     switch(operation) {
         case 01:
             // LIT, R, 0, M
             // Push literal M onto data or stack
+				update_output_one("lit", R, L, M);
             LIT(R, 0, M);
             break;
         case 02:
             // RTN, 0, 0, 0
             // Operation to be performed on the data at the top of the stack
             RTN(0, 0, 0);
+				update_output_one("rtn", R, L, M);
             break;
         case 03:
             // LOD, R, L, M
             // Load value to top of stack from the stack location at offset M from L lexicographical levels down
             LOD(R, L, M);
+				update_output_one("lod", R, L, M);
             break;
         case 04: 
             // STO, R, L, M
             // Store value at top of stack in the stack location at offset M from L lexi levels down
             STO(R, L, M);
+				update_output_one("sto", R, L, M);
             break;
         case 05:
             // CAL, 0, L, M
             // Call procedure at code index M
             // Generate new activation record and pc <- M
             CAL(0, L, M);
+				update_output_one("cal", R, L, M);
             break;
         case 06:
             // INC 0, 0, M
             // Allocate M locals, increment SP by M. 
             // First 3 are Static Link (SL), Dynamic Link (DL), and return address (RA)
             INC(0, 0, M);
+				update_output_one("inc", R, L, M);
             break;
         case 07:
             // JMP 0, 0, M
             // Jump to instruction M
             JMP(0, 0, M);
+				update_output_one("jmp", R, L, M);
             break;
         case 8:
             // JPC, R, 0, M
             // Jump to instruction M if top stack element == 0
             JPC(R, 0, M);
+				update_output_one("jpc", R, L, M);
             break;
         case 9:
             // SIO, R, 0, 1
             // Write top of stack to screen
             // pop? peek? who knows
             SIO(R, 0, 1);
+				update_output_one("sio", R, L, M);
             break;
         case 10:
             // SIO, R, 0, 2
             // Read in input from user and store at top of stack
             SIO(R, 0, 2);
+				update_output_one("sio", R, L, M);
             break;
         case 11: 
             // SIO, R, 0, 3
             // End of program: halt condition
             SIO(R, 0, 3);
+				update_output_one("sio", R, L, M);
             break;
         default:
             if (operation >= 12) {
                 MATH(operation, R, L, M);
+				update_output_one("RIP", R, L, M);
             }
             break;
     }
@@ -383,7 +397,7 @@ int do_operation(instruction * instr) {
 
 int read_in(FILE * fp, instruction * text) {
 	int lines_of_text = 0;
-	while (fscanf(fp, "%d %d %d", &text[lines_of_text].op, &text[lines_of_text].l, &text[lines_of_text].m) != EOF) {
+	while (fscanf(fp, "%d %d %d %d", &text[lines_of_text].op, &text[lines_of_text].reg, &text[lines_of_text].l, &text[lines_of_text].m) != EOF) {
 		lines_of_text++;
 	}
 	
@@ -403,6 +417,25 @@ char * dynamic_strcat(char * base, char * added) {
 	strcpy(conjoined, base);
 
 	return strcat(conjoined, added);
+}
+
+void update_output_one(char * OP, int R, int L, int M) {
+	char tmp[3];
+
+	output_one = dynamic_strcat(output_one, OP);
+	
+	sprintf(tmp, "\t%d", R);
+	output_one = dynamic_strcat(output_one, tmp);
+
+	sprintf(tmp, "\t%d", L);
+	output_one = dynamic_strcat(output_one, tmp);
+
+	sprintf(tmp, "\t%d", M);
+	output_one = dynamic_strcat(output_one, tmp);
+
+	output_one = dynamic_strcat(output_one, "\n");
+
+	return;
 }
 
 int main(void) {
@@ -429,14 +462,14 @@ int main(void) {
 
 	// record number of operations while reading from input.txt
 	lines_of_text = read_in(fp, text);
-/*
+
 	// use said text array for the mega-while loop
-	sprintf(line_index, "%d\t", i);
 	for (i = 0; i < lines_of_text; i++) {
+		sprintf(line_index, "%d\t", i);
 		output_one = dynamic_strcat(output_one, line_index);
 		do_operation(text[i]);
 	}
-*/
+
 	// write the strings to the output file		
 	fclose(fp);
 	fp = fopen("output.txt", "w");
