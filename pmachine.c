@@ -32,8 +32,8 @@ int REG[REG_FILE_LENGTH];
 /* Begin Stack */
 /* ===========================================*/
 // these are also registers
-int BP = 0; // base pointer
-int SP = MAX_DATA_STACK_HEIGHT; // stack pointer
+int BP = 1; // base pointer
+int SP = 0; // stack pointer
 
 int stack_is_empty(void) {
     if (SP == MAX_DATA_STACK_HEIGHT) {
