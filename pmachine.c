@@ -110,80 +110,108 @@ int LIT(int R, int zero, int M) {
     REG[R] = M;
 }
 
-// OPR
-// M determines operation to perform
-int OPR(int zero, int M) {
-    switch(M) {
-        case 0:
-            // RET
-            SP = BP + 1;
-            BP = stack[SP - 3];
-            PC = stack[SP - 4];
-            break;
-        case 1:
+// MATH
+// OP determines operation to perform
+int MATH(int OP, int R, int L, int M) {
+    // i = R, j=L, R=REG, k=M
+    switch(OP) {
+        case 12:
             // NEG
-            stack[SP] = -stack[SP];
+            // stack[SP] = -stack[SP];
+            REG[R] = -REG[L];
             break;
-        case 2:
+        case 13:
             // ADD
-            SP += 1;
-            stack[SP] = stack[SP] + stack[SP - 1];
+            /* SP += 1;
+            stack[SP] = stack[SP] + stack[SP - 1]; */
+            REG[R] = REG[L] + REG[M];
             break;
-        case 3: 
+        case 14: 
             // SUB
+            /* 
             SP += 1;
             stack[SP] = stack[SP] - stack[SP - 1];
+            */
+            REG[R] = REG[L] - REG[M];
             break;
-        case 4:
+        case 15:
             // MUL
+            /*
             SP += 1;
             stack[SP] = stack[SP] * stack[SP - 1];
+            */
+            REG[R] = REG[L] * REG[M];
             break;
-        case 5:
+        case 16:
             // DIV
+            /*
             SP += 1;
             stack[SP] = stack[SP] / stack[SP - 1];
+            */
+            REG[R] = REG[L] / REG[M];
             break;
-        case 6:
+        case 17:
             // ODD
             // @TODO_done: I cannot make sense of this pseudocode. 
             // stack[sp] = stack[sp] mod 2) or ord(odd(stack[sp]))
-          	stack[SP] = stack[SP] % 2;
+          	// stack[SP] = stack[SP] % 2;
+            REG[R] = REG[R] % 2;
             break;
-        case 7:
+        case 18:
             // MOD
+            /*
             SP += 1;
             stack[SP] = stack[SP] % stack[SP - 1];
+            */
+            REG[R] = REG[L] % REG[M];
             break;
-        case 8:
+        case 19:
             // EQL
+            /*
             SP += 1;
             stack[SP] = stack[SP] == stack[SP - 1];
+            */
+            REG[R] = REG[L] == REG[M];
             break;
-        case 9:
+        case 20:
             // NEQ
+            /*
             SP += 1;
             stack[SP] = stack[SP] != stack[SP - 1];
+            */
+            REG[R] = REG[L] != REG[M];
             break;
-        case 10:
+        case 21:
             // LSS
+            /*
             SP += 1;
             stack[SP] = stack[SP] < stack[SP - 1];
+            */
+            REG[R] = REG[L] < REG[M];
             break;
-        case 11:
+        case 22:
             // LEQ
+            /*
             SP += 1;
             stack[SP] = stack[SP] <= stack[SP - 1];
+            */
+            REG[R] = REG[L] <= REG[M];
             break;
-        case 12:
+        case 23:
             // GTR
+            /*
             SP += 1;
             stack[SP] = stack[SP] > stack[SP - 1];
+            */
+            REG[R] = REG[L] > REG[M];
             break;
-        case 13:
+        case 24:
             // GEQ
+            /*
             SP += 1;
             stack[SP] = stack[SP] >= stack[SP - 1];
+            */
+            REG[R] = REG[L] >= REG[M];
             break;
     }
 }
@@ -342,6 +370,11 @@ int do_operation(instruction * instr) {
             // SIO, R, 0, 3
             // End of program: halt condition
             SIO(R, 0, 3);
+            break;
+        default:
+            if (operation >= 12) {
+                MATH(operation, R, L, M);
+            }
             break;
     }
 }
