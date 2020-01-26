@@ -121,12 +121,14 @@ int MATH(int OP, int R, int L, int M) {
             // NEG
             // stack[SP] = -stack[SP];
             REG[R] = -REG[L];
+				update_output_one("neg", R, L, M);
             break;
         case 13:
             // ADD
             /* SP += 1;
             stack[SP] = stack[SP] + stack[SP - 1]; */
             REG[R] = REG[L] + REG[M];
+				update_output_one("add", R, L, M);
             break;
         case 14: 
             // SUB
@@ -135,6 +137,7 @@ int MATH(int OP, int R, int L, int M) {
             stack[SP] = stack[SP] - stack[SP - 1];
             */
             REG[R] = REG[L] - REG[M];
+				update_output_one("sub", R, L, M);
             break;
         case 15:
             // MUL
@@ -143,6 +146,7 @@ int MATH(int OP, int R, int L, int M) {
             stack[SP] = stack[SP] * stack[SP - 1];
             */
             REG[R] = REG[L] * REG[M];
+				update_output_one("mul", R, L, M);
             break;
         case 16:
             // DIV
@@ -151,6 +155,7 @@ int MATH(int OP, int R, int L, int M) {
             stack[SP] = stack[SP] / stack[SP - 1];
             */
             REG[R] = REG[L] / REG[M];
+				update_output_one("div", R, L, M);
             break;
         case 17:
             // ODD
@@ -158,6 +163,7 @@ int MATH(int OP, int R, int L, int M) {
             // stack[sp] = stack[sp] mod 2) or ord(odd(stack[sp]))
           	// stack[SP] = stack[SP] % 2;
             REG[R] = REG[R] % 2;
+				update_output_one("odd", R, L, M);
             break;
         case 18:
             // MOD
@@ -166,6 +172,7 @@ int MATH(int OP, int R, int L, int M) {
             stack[SP] = stack[SP] % stack[SP - 1];
             */
             REG[R] = REG[L] % REG[M];
+				update_output_one("mod", R, L, M);
             break;
         case 19:
             // EQL
@@ -174,6 +181,7 @@ int MATH(int OP, int R, int L, int M) {
             stack[SP] = stack[SP] == stack[SP - 1];
             */
             REG[R] = REG[L] == REG[M];
+				update_output_one("eql", R, L, M);
             break;
         case 20:
             // NEQ
@@ -182,6 +190,7 @@ int MATH(int OP, int R, int L, int M) {
             stack[SP] = stack[SP] != stack[SP - 1];
             */
             REG[R] = REG[L] != REG[M];
+				update_output_one("neq", R, L, M);
             break;
         case 21:
             // LSS
@@ -190,6 +199,7 @@ int MATH(int OP, int R, int L, int M) {
             stack[SP] = stack[SP] < stack[SP - 1];
             */
             REG[R] = REG[L] < REG[M];
+				update_output_one("lss", R, L, M);
             break;
         case 22:
             // LEQ
@@ -198,6 +208,7 @@ int MATH(int OP, int R, int L, int M) {
             stack[SP] = stack[SP] <= stack[SP - 1];
             */
             REG[R] = REG[L] <= REG[M];
+				update_output_one("leq", R, L, M);
             break;
         case 23:
             // GTR
@@ -206,6 +217,7 @@ int MATH(int OP, int R, int L, int M) {
             stack[SP] = stack[SP] > stack[SP - 1];
             */
             REG[R] = REG[L] > REG[M];
+				update_output_one("gtr", R, L, M);
             break;
         case 24:
             // GEQ
@@ -214,6 +226,7 @@ int MATH(int OP, int R, int L, int M) {
             stack[SP] = stack[SP] >= stack[SP - 1];
             */
             REG[R] = REG[L] >= REG[M];
+				update_output_one("geq", R, L, M);
             break;
     }
 }
