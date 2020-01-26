@@ -5,8 +5,11 @@
 #define MAX_DATA_STACK_HEIGHT 40
 #define MAX_CODE_LENGTH 200
 #define MAX_LEXI_LEVEL 3
+#define REG_FILE_LENGTH 8
 
+// stack, init to 0
 int stack[MAX_DATA_STACK_HEIGHT];
+
 int lex[MAX_LEXI_LEVEL];
 int code[MAX_CODE_LENGTH];	// pretty sure this needs to be an instruction pointer array
 
@@ -21,6 +24,8 @@ int halt = -1;
 int PC = 0;
 int IR = 0;
 int GP = -1;
+
+int REG[REG_FILE_LENGTH];
 
 /* Begin Stack */
 /* ===========================================*/
@@ -74,9 +79,10 @@ int stack_push(int data) {
 /* Begin P-Machine */
 // instruction format from file is {OP LEVEL M} space-separated.
 typedef struct instruction {
-   int op;
-   int l;
-   int m;
+    int op;
+    int reg;
+    int l;
+    int m;
 } instruction;
 
 /* find base L levels down */
@@ -92,13 +98,16 @@ int base(int l, int base) {
 }
 
 // LIT
-int LIT(int zero, int M) {
+int LIT(int R, int zero, int M) {
+    /*
     if (BP == 0) {
         stack_push(M);
     } else {
         SP -= 1;
         stack[SP] = M;
     }
+    */
+    REG[R] = M;
 }
 
 // OPR
@@ -179,7 +188,14 @@ int OPR(int zero, int M) {
     }
 }
 
-int LOD(int L, int M) {
+int RTN(int zero1, int zero2, int zero3) {
+    SP = BP - 1;
+    BP = stack[SP + 3];
+    PC = stack[SP + 4];
+}
+
+int LOD(int R, int L, int M) {
+    /*
     if (base(L, BP) == 0) {
         GP += 1;
         stack[GP] = stack[base(L, BP) + M];
@@ -187,9 +203,12 @@ int LOD(int L, int M) {
         SP -= 1;
         stack[SP] = stack[base(L, BP) - M];
     }
+    */
+    REG[R] = stack[base(L, BP) + M];
 }
 
-int STO(int L, int M) {
+int STO(int R, int L, int M) {
+    /*
     if (base(L, BP) == 0) {
         stack[base(L, BP) + M] = stack[GP];
         GP -= 1;
@@ -197,9 +216,11 @@ int STO(int L, int M) {
         stack[base(L, BP) - M] = stack[SP];
         SP += 1;
     }
+    */
+    stack[base(L, BP) + M] = REG[R];
 }
 
-int CAL(int L, int M) {
+int CAL(int zero, int L, int M) {
     /*
     if (SP - 4 <= GP) {
         printf("Stack overflow error!");
@@ -214,7 +235,7 @@ int CAL(int L, int M) {
     PC = M;
 }
 
-int INC(int zero, int M) {
+int INC(int zero1, int zero2, int M) {
     /*
     if (SP - M <= GP) {
         printf("Stack overflow error!");
@@ -229,31 +250,31 @@ int INC(int zero, int M) {
     SP += M;
 }
 
-int JMP(int zero, int M) {
+int JMP(int zero1, int zero2, int M) {
     PC = M;
 }
 
-int JPC(int zero, int M) {
+int JPC(int R, int zero, int M) {
     if (stack[SP] == 0) {
         PC = M;
     }
-    SP += 1;
+    // SP += 1;
 }
 
-int SIO(int zero, int M) {
+int SIO(int R, int zero, int M) {
     switch(M) {
         case 1:
-            printf("%d", stack[SP]);
-            SP += 1;
+            printf("%d", REG[SP]);
+            // SP += 1;
             break;
         case 2:
             SP -= 1;
             // read user input into stack
             printf("Enter integer to push to stack: ");
-            scanf("%d", &stack[SP]);
+            scanf("%d", &REG[SP]);
             break;
         case 3:
-            halt = 0;
+            halt = 1;
     }
 }
 
@@ -262,64 +283,65 @@ int do_operation(instruction * instr) {
     int M = instr -> m;
     int L = instr -> l;
     int operation = instr -> op;
+    int R = instr -> reg;
     switch(operation) {
         case 01:
-            // LIT, 0, M
+            // LIT, R, 0, M
             // Push literal M onto data or stack
-            LIT(0, M);
+            LIT(R, 0, M);
             break;
         case 02:
-            // OPR, 0, M
+            // RTN, 0, 0, 0
             // Operation to be performed on the data at the top of the stack
-            OPR(0, M);
+            RTN(0, 0, 0);
             break;
         case 03:
-            // LOD, L, M
+            // LOD, R, L, M
             // Load value to top of stack from the stack location at offset M from L lexicographical levels down
-            LOD(L, M);
+            LOD(R, L, M);
             break;
         case 04: 
-            // STO, L, M
+            // STO, R, L, M
             // Store value at top of stack in the stack location at offset M from L lexi levels down
-            STO(L, M);
+            STO(R, L, M);
             break;
         case 05:
-            // CAL, L, M
+            // CAL, 0, L, M
             // Call procedure at code index M
             // Generate new activation record and pc <- M
-            CAL(L, M);
+            CAL(0, L, M);
             break;
         case 06:
-            // INC 0, M
+            // INC 0, 0, M
             // Allocate M locals, increment SP by M. 
             // First 3 are Static Link (SL), Dynamic Link (DL), and return address (RA)
-            INC(0, M);
+            INC(0, 0, M);
             break;
         case 07:
-            // JMP 0, M
+            // JMP 0, 0, M
             // Jump to instruction M
-            JMP(0, M);
+            JMP(0, 0, M);
             break;
         case 8:
-            // JPC 0, M
+            // JPC, R, 0, M
             // Jump to instruction M if top stack element == 0
-            JPC(0, M);
+            JPC(R, 0, M);
             break;
         case 9:
-            // SIO 0, 1
+            // SIO, R, 0, 1
             // Write top of stack to screen
             // pop? peek? who knows
-            SIO(0, 1);
+            SIO(R, 0, 1);
             break;
         case 10:
-            // SIO 0, 2
+            // SIO, R, 0, 2
             // Read in input from user and store at top of stack
-            SIO(0, 2);
+            SIO(R, 0, 2);
             break;
         case 11: 
-            // SIO 0, 3
+            // SIO, R, 0, 3
             // End of program: halt condition
-            SIO(0, 3);
+            SIO(R, 0, 3);
             break;
     }
 }
@@ -351,6 +373,16 @@ char * dynamic_strcat(char * base, char * added) {
 }
 
 int main(void) {
+    // init stack
+    for (int i = 0; i < MAX_DATA_STACK_HEIGHT; i++) {
+        stack[i] = 0;
+    }
+    
+    // init REG
+    for (int i = 0; i < REG_FILE_LENGTH; i++) {
+        REG[i] = 0;
+    }
+
 	FILE *fp = fopen("input.txt", "r");
 	instruction * text = (instruction *)calloc(MAX_CODE_LENGTH, sizeof(instruction));
 	char line_index[4];
