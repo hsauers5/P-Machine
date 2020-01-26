@@ -137,7 +137,7 @@ int OPR(int zero, int M) {
             break;
         case 6:
             // ODD
-            // @TODO: I cannot make sense of this pseudocode. 
+            // @TODO_done: I cannot make sense of this pseudocode. 
             // stack[sp] = stack[sp] mod 2) or ord(odd(stack[sp]))
           	stack[SP] = stack[SP] % 2;
             break;
@@ -200,19 +200,22 @@ int STO(int L, int M) {
 }
 
 int CAL(int L, int M) {
+    /*
     if (SP - 4 <= GP) {
         printf("Stack overflow error!");
         return 0;
     }
-    stack[SP - 1] = 0;
-    stack[SP - 2] = base(L, BP);
-    stack[SP - 3] = BP;
-    stack[SP - 4] = PC;
-    BP = SP - 1;
+    */
+    stack[SP + 1] = 0;
+    stack[SP + 2] = base(L, BP);
+    stack[SP + 3] = BP;
+    stack[SP + 4] = PC;
+    BP = SP + 1;
     PC = M;
 }
 
 int INC(int zero, int M) {
+    /*
     if (SP - M <= GP) {
         printf("Stack overflow error!");
         return 0;
@@ -222,6 +225,8 @@ int INC(int zero, int M) {
     } else {
         SP = SP - M;
     }
+    */
+    SP += M;
 }
 
 int JMP(int zero, int M) {
@@ -319,7 +324,7 @@ int do_operation(instruction * instr) {
     }
 }
 
-// @TODO write a control method and handle input
+// write a control method and handle input
 
 int read_in(FILE * fp, instruction * text) {
 	int lines_of_text = 0;
