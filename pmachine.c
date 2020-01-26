@@ -36,7 +36,7 @@ int BP = 1; // base pointer
 int SP = 0; // stack pointer
 
 int stack_is_empty(void) {
-    if (SP == MAX_DATA_STACK_HEIGHT) {
+    if (SP == BP) {
         return 1;
     } else {
         return 0;
@@ -44,7 +44,7 @@ int stack_is_empty(void) {
 }
 
 int stack_is_full(void) {
-    if (SP == BP) {
+    if (SP == MAX_DATA_STACK_HEIGHT) {
         return 1;
     } else {
         return 0;
@@ -58,7 +58,7 @@ int stack_peek(void) {
 int stack_pop(void) {
     if (!stack_is_empty()) {
         int tmp = stack[SP];
-        SP += 1;
+        SP -= 1;
         return tmp;
     } else {
         printf("Stack is empty!");
@@ -67,7 +67,7 @@ int stack_pop(void) {
 
 int stack_push(int data) {
     if (!stack_is_full()) {
-        SP -= 1;
+        SP += 1;
         stack[SP] = data;
         return 1;
     } else {
