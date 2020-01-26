@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_DATA_STACK_HEIGHT 23
-#define MAX_CODE_LENGTH 500
+#define MAX_DATA_STACK_HEIGHT 40
+#define MAX_CODE_LENGTH 200
 #define MAX_LEXI_LEVEL 3
 
 int stack[MAX_DATA_STACK_HEIGHT];
