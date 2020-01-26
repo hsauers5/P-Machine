@@ -15,17 +15,17 @@ int code[MAX_CODE_LENGTH];	// pretty sure this needs to be an instruction pointe
 
 // output mega strings (might go 2-d later on)
 char * output_one = {"Line\tOP\tR\tL\tM\n"};
-char * output_two = {"\t\t\tgp\tpc\tbp\tsp\tdata\t\t\tstack\nInitial values\t\n"};
+char * output_two = {"\t\tpc\tbp\tsp\tregisters\nInitial values\t"};
 
 void update_output_one(char * OP, int R, int L, int M);
-
+void update_output_two();
+char * dynamic_strcat(char * base, char * added);
 // strangely: if halt is false then program should halt, else continue
 int halt = -1;
 
 // registers
 int PC = 0;
 int IR = 0;
-int GP = -1;
 
 int REG[REG_FILE_LENGTH];
 
@@ -120,15 +120,19 @@ int MATH(int OP, int R, int L, int M) {
         case 12:
             // NEG
             // stack[SP] = -stack[SP];
-            REG[R] = -REG[L];
+            	REG[R] = -REG[L];
 				update_output_one("neg", R, L, M);
+				output_two = dynamic_strcat(output_two, "\t\t");
+				update_output_two();
             break;
         case 13:
             // ADD
             /* SP += 1;
             stack[SP] = stack[SP] + stack[SP - 1]; */
-            REG[R] = REG[L] + REG[M];
+            	REG[R] = REG[L] + REG[M];
 				update_output_one("add", R, L, M);
+				output_two = dynamic_strcat(output_two, "\t\t");
+				update_output_two();
             break;
         case 14: 
             // SUB
@@ -136,8 +140,10 @@ int MATH(int OP, int R, int L, int M) {
             SP += 1;
             stack[SP] = stack[SP] - stack[SP - 1];
             */
-            REG[R] = REG[L] - REG[M];
+            	REG[R] = REG[L] - REG[M];
 				update_output_one("sub", R, L, M);
+				output_two = dynamic_strcat(output_two, "\t\t");
+				update_output_two();
             break;
         case 15:
             // MUL
@@ -145,8 +151,10 @@ int MATH(int OP, int R, int L, int M) {
             SP += 1;
             stack[SP] = stack[SP] * stack[SP - 1];
             */
-            REG[R] = REG[L] * REG[M];
+            	REG[R] = REG[L] * REG[M];
 				update_output_one("mul", R, L, M);
+				output_two = dynamic_strcat(output_two, "\t\t");
+				update_output_two();
             break;
         case 16:
             // DIV
@@ -154,16 +162,20 @@ int MATH(int OP, int R, int L, int M) {
             SP += 1;
             stack[SP] = stack[SP] / stack[SP - 1];
             */
-            REG[R] = REG[L] / REG[M];
+            	REG[R] = REG[L] / REG[M];
 				update_output_one("div", R, L, M);
+				output_two = dynamic_strcat(output_two, "\t\t");
+				update_output_two();
             break;
         case 17:
             // ODD
             // @TODO_done: I cannot make sense of this pseudocode. 
             // stack[sp] = stack[sp] mod 2) or ord(odd(stack[sp]))
           	// stack[SP] = stack[SP] % 2;
-            REG[R] = REG[R] % 2;
+            	REG[R] = REG[R] % 2;
 				update_output_one("odd", R, L, M);
+				output_two = dynamic_strcat(output_two, "\t\t");
+				update_output_two();
             break;
         case 18:
             // MOD
@@ -171,8 +183,10 @@ int MATH(int OP, int R, int L, int M) {
             SP += 1;
             stack[SP] = stack[SP] % stack[SP - 1];
             */
-            REG[R] = REG[L] % REG[M];
+            	REG[R] = REG[L] % REG[M];
 				update_output_one("mod", R, L, M);
+				output_two = dynamic_strcat(output_two, "\t\t");
+				update_output_two();
             break;
         case 19:
             // EQL
@@ -180,8 +194,10 @@ int MATH(int OP, int R, int L, int M) {
             SP += 1;
             stack[SP] = stack[SP] == stack[SP - 1];
             */
-            REG[R] = REG[L] == REG[M];
+            	REG[R] = REG[L] == REG[M];
 				update_output_one("eql", R, L, M);
+				output_two = dynamic_strcat(output_two, "\t\t");
+				update_output_two();
             break;
         case 20:
             // NEQ
@@ -189,8 +205,10 @@ int MATH(int OP, int R, int L, int M) {
             SP += 1;
             stack[SP] = stack[SP] != stack[SP - 1];
             */
-            REG[R] = REG[L] != REG[M];
+            	REG[R] = REG[L] != REG[M];
 				update_output_one("neq", R, L, M);
+				output_two = dynamic_strcat(output_two, "\t\t");
+				update_output_two();
             break;
         case 21:
             // LSS
@@ -198,8 +216,10 @@ int MATH(int OP, int R, int L, int M) {
             SP += 1;
             stack[SP] = stack[SP] < stack[SP - 1];
             */
-            REG[R] = REG[L] < REG[M];
+            	REG[R] = REG[L] < REG[M];
 				update_output_one("lss", R, L, M);
+				output_two = dynamic_strcat(output_two, "\t\t");
+				update_output_two();
             break;
         case 22:
             // LEQ
@@ -207,8 +227,10 @@ int MATH(int OP, int R, int L, int M) {
             SP += 1;
             stack[SP] = stack[SP] <= stack[SP - 1];
             */
-            REG[R] = REG[L] <= REG[M];
+            	REG[R] = REG[L] <= REG[M];
 				update_output_one("leq", R, L, M);
+				output_two = dynamic_strcat(output_two, "\t\t");
+				update_output_two();
             break;
         case 23:
             // GTR
@@ -216,8 +238,10 @@ int MATH(int OP, int R, int L, int M) {
             SP += 1;
             stack[SP] = stack[SP] > stack[SP - 1];
             */
-            REG[R] = REG[L] > REG[M];
+            	REG[R] = REG[L] > REG[M];
 				update_output_one("gtr", R, L, M);
+				output_two = dynamic_strcat(output_two, "\t\t");
+				update_output_two();
             break;
         case 24:
             // GEQ
@@ -225,8 +249,10 @@ int MATH(int OP, int R, int L, int M) {
             SP += 1;
             stack[SP] = stack[SP] >= stack[SP - 1];
             */
-            REG[R] = REG[L] >= REG[M];
+            	REG[R] = REG[L] >= REG[M];
 				update_output_one("geq", R, L, M);
+				output_two = dynamic_strcat(output_two, "\t\t");
+				update_output_two();
             break;
     }
 }
@@ -331,76 +357,97 @@ int do_operation(instruction instr) {
         case 01:
             // LIT, R, 0, M
             // Push literal M onto data or stack
+            	LIT(R, 0, M);
 				update_output_one("lit", R, L, M);
-            LIT(R, 0, M);
+				output_two = dynamic_strcat(output_two, "\t\t");
+				update_output_two();
             break;
         case 02:
             // RTN, 0, 0, 0
             // Operation to be performed on the data at the top of the stack
-            RTN(0, 0, 0);
+            	RTN(0, 0, 0);
 				update_output_one("rtn", R, L, M);
+				output_two = dynamic_strcat(output_two, "\t\t");
+				update_output_two();
             break;
         case 03:
             // LOD, R, L, M
             // Load value to top of stack from the stack location at offset M from L lexicographical levels down
-            LOD(R, L, M);
+            	LOD(R, L, M);
 				update_output_one("lod", R, L, M);
+				output_two = dynamic_strcat(output_two, "\t\t");
+				update_output_two();
             break;
         case 04: 
             // STO, R, L, M
             // Store value at top of stack in the stack location at offset M from L lexi levels down
-            STO(R, L, M);
+            	STO(R, L, M);
 				update_output_one("sto", R, L, M);
+				output_two = dynamic_strcat(output_two, "\t\t");
+				update_output_two();
             break;
         case 05:
             // CAL, 0, L, M
             // Call procedure at code index M
             // Generate new activation record and pc <- M
-            CAL(0, L, M);
+            	CAL(0, L, M);
 				update_output_one("cal", R, L, M);
+				output_two = dynamic_strcat(output_two, "\t\t");
+				update_output_two();
             break;
         case 06:
             // INC 0, 0, M
             // Allocate M locals, increment SP by M. 
             // First 3 are Static Link (SL), Dynamic Link (DL), and return address (RA)
-            INC(0, 0, M);
+            	INC(0, 0, M);
 				update_output_one("inc", R, L, M);
+				output_two = dynamic_strcat(output_two, "\t\t");
+				update_output_two();
             break;
         case 07:
             // JMP 0, 0, M
             // Jump to instruction M
-            JMP(0, 0, M);
+            	JMP(0, 0, M);
 				update_output_one("jmp", R, L, M);
+				output_two = dynamic_strcat(output_two, "\t\t");
+				update_output_two();
             break;
         case 8:
             // JPC, R, 0, M
             // Jump to instruction M if top stack element == 0
-            JPC(R, 0, M);
+            	JPC(R, 0, M);
 				update_output_one("jpc", R, L, M);
+				output_two = dynamic_strcat(output_two, "\t\t");
+				update_output_two();
             break;
         case 9:
             // SIO, R, 0, 1
             // Write top of stack to screen
             // pop? peek? who knows
-            SIO(R, 0, 1);
+            	SIO(R, 0, 1);
 				update_output_one("sio", R, L, M);
+				output_two = dynamic_strcat(output_two, "\t\t");
+				update_output_two();
             break;
         case 10:
             // SIO, R, 0, 2
             // Read in input from user and store at top of stack
-            SIO(R, 0, 2);
+            	SIO(R, 0, 2);
 				update_output_one("sio", R, L, M);
+				output_two = dynamic_strcat(output_two, "\t\t");
+				update_output_two();
             break;
         case 11: 
             // SIO, R, 0, 3
             // End of program: halt condition
-            SIO(R, 0, 3);
+            	SIO(R, 0, 3);
 				update_output_one("sio", R, L, M);
+				output_two = dynamic_strcat(output_two, "\t\t");
+				update_output_two();
             break;
         default:
             if (operation >= 12) {
                 MATH(operation, R, L, M);
-				update_output_one("RIP", R, L, M);
             }
             break;
     }
@@ -451,6 +498,37 @@ void update_output_one(char * OP, int R, int L, int M) {
 	return;
 }
 
+void update_output_two() {
+	char tmp[3];
+	int i;
+
+	// update the registers
+	sprintf(tmp, "%d\t", PC);
+	output_two = dynamic_strcat(output_two, tmp);
+
+	sprintf(tmp, "%d\t", BP);
+	output_two = dynamic_strcat(output_two, tmp);
+
+	sprintf(tmp, "%d\t", SP);
+	output_two = dynamic_strcat(output_two, tmp);
+
+	for (i = 0; i < REG_FILE_LENGTH - 1; i++) {
+		sprintf(tmp, "%d ", REG[i]);
+		output_two = dynamic_strcat(output_two, tmp);
+	}
+	sprintf(tmp, "%d\n", REG[REG_FILE_LENGTH - 1]);
+	output_two = dynamic_strcat(output_two, tmp);
+	// update the stack
+	output_two = dynamic_strcat(output_two, "Stack:");
+	for (i = 0; i < MAX_DATA_STACK_HEIGHT; i++) {
+		sprintf(tmp, " %d", stack[i]);
+		output_two = dynamic_strcat(output_two, tmp);		
+	}
+	output_two = dynamic_strcat(output_two, "\n\n");		
+
+	return;
+}
+
 int main(void) {
     // init stack
     for (int i = 0; i < MAX_DATA_STACK_HEIGHT; i++) {
@@ -477,6 +555,7 @@ int main(void) {
 	lines_of_text = read_in(fp, text);
 
 	// use said text array for the mega-while loop
+	update_output_two();
 	for (i = 0; i < lines_of_text; i++) {
 		sprintf(line_index, "%d\t", i);
 		output_one = dynamic_strcat(output_one, line_index);
