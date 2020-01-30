@@ -20,6 +20,7 @@ char * output_two = {"\t\tpc\tbp\tsp\tregisters\nInitial values\t"};
 void update_output_one(char * OP, int R, int L, int M, int i);
 void update_output_two();
 char * dynamic_strcat(char * base, char * added);
+char * convert_tabs_to_spaces(char * str);
 // strangely: if halt is false then program should halt, else continue
 int halt = 0;
 
@@ -314,6 +315,7 @@ int do_operation(instruction instr) {
     int L = instr.l;
     int operation = instr.op;
     int R = instr.reg;
+	char * tabless_str;
 
 	PC++;
 
@@ -382,7 +384,9 @@ int do_operation(instruction instr) {
             }
             break;
     }
-		output_two = dynamic_strcat(output_two, output_one[PC-1]);
+		tabless_str = convert_tabs_to_spaces(output_one[PC-1]);
+		output_two = dynamic_strcat(output_two, tabless_str);
+		output_two = dynamic_strcat(output_two, "\t");
 		update_output_two();
 }
 
@@ -540,8 +544,15 @@ char * ins_to_string(instruction ins, int i) {
 	return output_one[i];
 }
 
-void convert_tabs_to_spaces(char * str) {
-	
+char * convert_tabs_to_spaces(char * str) {
+	int i;
+	int length = strlen(str);
+	char * cpy = (char *)calloc(length, sizeof(char *));
+	cpy = strcpy(cpy, str);
+	for (i = 0; i < length; i++)
+		if (cpy[i] == '\t')
+			cpy[i] = ' ';
+	return cpy;
 }
 
 int main(void) {
@@ -585,13 +596,6 @@ int main(void) {
 		do_operation(text[PC]);
 	}
 
-	// i think this is obsolete debugging
-/*
-	for (i = 0; i < lines_of_text; i++) {
-		printf("%s\n", output_one[i]);
-	}
-	printf("%s\n", output_two);
-*/
 	// write the strings to the output file		
 	fclose(fp);
 	fp = fopen("output.txt", "w");
