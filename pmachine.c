@@ -1,3 +1,8 @@
+// TODO: make a README for this file
+// TODO: add a | for each function in output stack
+// TODO: throw every ISA function body raw into the switch statement
+// TODO: remove obsolete functions (if there are any)
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -318,6 +323,9 @@ int do_operation(instruction instr) {
 	char * tabless_str;
 
 	PC++;
+	tabless_str = convert_tabs_to_spaces(output_one[PC-1]);
+	output_two = dynamic_strcat(output_two, tabless_str);
+	output_two = dynamic_strcat(output_two, "\t");
 
     switch(operation) {
         case 01:
@@ -384,13 +392,8 @@ int do_operation(instruction instr) {
             }
             break;
     }
-		tabless_str = convert_tabs_to_spaces(output_one[PC-1]);
-		output_two = dynamic_strcat(output_two, tabless_str);
-		output_two = dynamic_strcat(output_two, "\t");
-		update_output_two();
+	update_output_two();
 }
-
-// write a control method and handle input
 
 int read_in(FILE * fp, instruction * text) {
 	int lines_of_text = 0;
@@ -556,6 +559,11 @@ char * convert_tabs_to_spaces(char * str) {
 }
 
 int main(void) {
+	char line_index[4];
+	int lines_of_text;
+	int i;
+	instruction * text = (instruction *)calloc(MAX_CODE_LENGTH, sizeof(instruction));
+
     // init stack
     for (int i = 0; i < MAX_DATA_STACK_HEIGHT; i++) {
         stack[i] = 0;
@@ -567,16 +575,10 @@ int main(void) {
     }
 
 	FILE *fp = fopen("input.txt", "r");
-	instruction * text = (instruction *)calloc(MAX_CODE_LENGTH, sizeof(instruction));
-	char line_index[4];
-	int lines_of_text;
-	int i;
-
 	if (fp == NULL) {
 		printf("Error: Could not locate file.\n");
 		exit(-1);
 	}
-
 	// record number of operations while reading from input.txt
 	lines_of_text = read_in(fp, text);
 
@@ -590,7 +592,7 @@ int main(void) {
 		output_one[i] = ins_to_string(text[i], i);
 	}
 
-	// use said text array for the mega-while loop
+	// instruction fetch and execute
 	update_output_two();
 	while(!halt) {
 		do_operation(text[PC]);
@@ -599,7 +601,6 @@ int main(void) {
 	// write the strings to the output file		
 	fclose(fp);
 	fp = fopen("output.txt", "w");
-	
 	fprintf(fp, "Line\tOP\tR L M\n");
 	for (i = 0; i < lines_of_text; i++) {
 		fprintf(fp, "%s\n", output_one[i]);
