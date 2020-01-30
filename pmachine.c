@@ -1,7 +1,4 @@
-// TODO: make a README for this file
 // TODO: add a | for each function in output stack
-// TODO: throw every ISA function body raw into the switch statement
-// TODO: remove obsolete functions (if there are any)
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -105,18 +102,14 @@ int base(int l, int base) {
   return b1;
 }
 
+/*
+
 // LIT
 int LIT(int R, int zero, int M) {
-    /*
-    if (BP == 0) {
-        stack_push(M);
-    } else {
-        SP -= 1;
-        stack[SP] = M;
-    }
-    */
     REG[R] = M;
 }
+
+*/
 
 // MATH
 // OP determines operation to perform
@@ -224,6 +217,8 @@ int MATH(int OP, int R, int L, int M) {
     }
 }
 
+/*
+
 int RTN(int zero1, int zero2, int zero3) {
     SP = BP - 1;
     BP = stack[SP + 3];
@@ -231,38 +226,14 @@ int RTN(int zero1, int zero2, int zero3) {
 }
 
 int LOD(int R, int L, int M) {
-    /*
-    if (base(L, BP) == 0) {
-        GP += 1;
-        stack[GP] = stack[base(L, BP) + M];
-    } else {
-        SP -= 1;
-        stack[SP] = stack[base(L, BP) - M];
-    }
-    */
     REG[R] = stack[base(L, BP) + M];
 }
 
 int STO(int R, int L, int M) {
-    /*
-    if (base(L, BP) == 0) {
-        stack[base(L, BP) + M] = stack[GP];
-        GP -= 1;
-    } else {
-        stack[base(L, BP) - M] = stack[SP];
-        SP += 1;
-    }
-    */
     stack[base(L, BP) + M] = REG[R];
 }
 
 int CAL(int zero, int L, int M) {
-    /*
-    if (SP - 4 <= GP) {
-        printf("Stack overflow error!");
-        return 0;
-    }
-    */
     stack[SP + 1] = 0;
     stack[SP + 2] = base(L, BP);
     stack[SP + 3] = BP;
@@ -272,17 +243,6 @@ int CAL(int zero, int L, int M) {
 }
 
 int INC(int zero1, int zero2, int M) {
-    /*
-    if (SP - M <= GP) {
-        printf("Stack overflow error!");
-        return 0;
-    }
-    if (BP == 0) {
-        GP = GP + M;
-    } else {
-        SP = SP - M;
-    }
-    */
     SP += M;
 }
 
@@ -313,6 +273,7 @@ int SIO(int R, int zero, int M) {
             halt = 1;
     }
 }
+*/
 
 // ISA
 int do_operation(instruction instr) {
@@ -331,60 +292,73 @@ int do_operation(instruction instr) {
         case 01:
             // LIT, R, 0, M
             // Push literal M onto data or stack
-            	LIT(R, 0, M);
+            REG[R] = M;
             break;
         case 02:
             // RTN, 0, 0, 0
             // Operation to be performed on the data at the top of the stack
-            	RTN(0, 0, 0);
+            SP = BP - 1;
+            BP = stack[SP + 3];
+            PC = stack[SP + 4];
             break;
         case 03:
             // LOD, R, L, M
             // Load value to top of stack from the stack location at offset M from L lexicographical levels down
-            	LOD(R, L, M);
+            REG[R] = stack[base(L, BP) + M];
             break;
         case 04: 
             // STO, R, L, M
             // Store value at top of stack in the stack location at offset M from L lexi levels down
-            	STO(R, L, M);
+        	stack[base(L, BP) + M] = REG[R];
             break;
         case 05:
             // CAL, 0, L, M
             // Call procedure at code index M
             // Generate new activation record and pc <- M
-            	CAL(0, L, M);
+            stack[SP + 1] = 0;
+            stack[SP + 2] = base(L, BP);
+            stack[SP + 3] = BP;
+            stack[SP + 4] = PC;
+            BP = SP + 1;
+            PC = M;
             break;
         case 06:
             // INC 0, 0, M
             // Allocate M locals, increment SP by M. 
             // First 3 are Static Link (SL), Dynamic Link (DL), and return address (RA)
-            	INC(0, 0, M);
+            SP += M;
             break;
         case 07:
             // JMP 0, 0, M
             // Jump to instruction M
-            	JMP(0, 0, M);
+            PC = M;
             break;
         case 8:
             // JPC, R, 0, M
             // Jump to instruction M if top stack element == 0
-            	JPC(R, 0, M);
+            if (stack[SP] == 0) {
+                PC = M;
+            }
             break;
         case 9:
             // SIO, R, 0, 1
             // Write top of stack to screen
             // pop? peek? who knows
-            	SIO(R, 0, 1);
+            printf("%d", REG[SP]);
+            // SP += 1;
             break;
         case 10:
             // SIO, R, 0, 2
             // Read in input from user and store at top of stack
-            	SIO(R, 0, 2);
+            SP -= 1;
+            // read user input into stack
+            printf("Enter integer to push to stack: ");
+            scanf("%d", &REG[SP]);
             break;
         case 11: 
             // SIO, R, 0, 3
             // End of program: halt condition
-            	SIO(R, 0, 3);
+            halt = 1;
             break;
         default:
             if (operation >= 12) {
