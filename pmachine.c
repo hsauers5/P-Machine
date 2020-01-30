@@ -382,7 +382,6 @@ int do_operation(instruction instr) {
             }
             break;
     }
-		printf("fahjfhl;asfd\n");
 		output_two = dynamic_strcat(output_two, output_one[PC-1]);
 		update_output_two();
 }
@@ -415,12 +414,9 @@ char * dynamic_strcat(char * base, char * added) {
 
 void update_output_one(char * OP, int R, int L, int M, int i) {
 	char tmp[3];
-	printf("gamer word %d\n", i);
 	output_one[i] = dynamic_strcat(output_one[i], OP);
-	printf("ni-\n");
 	sprintf(tmp, "\t%d", R);
 	output_one[i] = dynamic_strcat(output_one[i], tmp);
-	printf("sad days\n");
 	sprintf(tmp, " %d", L);
 	output_one[i] = dynamic_strcat(output_one[i], tmp);
 
@@ -537,11 +533,15 @@ char * ins_to_string(instruction ins, int i) {
 			break;
 		default:
 			printf("literally not possible");
-}
+	}
 	// function the rest
 		update_output_one(tmp, ins.reg, ins.l, ins.m, i);
 
 	return output_one[i];
+}
+
+void convert_tabs_to_spaces(char * str) {
+	
 }
 
 int main(void) {
@@ -573,14 +573,9 @@ int main(void) {
 	output_one = (char **)calloc(lines_of_text, sizeof(char *));
 	// loop to create output one
 	for (i = 0; i < lines_of_text; i++) {
-		printf("%d\n", i);
-		printf("yeet\n");
 		output_one[i] = (char *)calloc(1, sizeof(char));
-		printf("yah\n");
 		sprintf(line_index, "%d\t", i);
-		printf("yote\n");
 		output_one[i] = dynamic_strcat(output_one[i], line_index);
-		printf("schleet\n");
 		output_one[i] = ins_to_string(text[i], i);
 	}
 
@@ -590,15 +585,15 @@ int main(void) {
 		do_operation(text[PC]);
 	}
 
-	printf("pass the boof\n");
-
+	// i think this is obsolete debugging
+/*
 	for (i = 0; i < lines_of_text; i++) {
 		printf("%s\n", output_one[i]);
 	}
 	printf("%s\n", output_two);
+*/
 	// write the strings to the output file		
 	fclose(fp);
-	printf("close the sesame\n");
 	fp = fopen("output.txt", "w");
 	
 	fprintf(fp, "Line\tOP\tR L M\n");
