@@ -15,6 +15,9 @@ int stack[MAX_DATA_STACK_HEIGHT];
 int lex[MAX_LEXI_LEVEL];
 int code[MAX_CODE_LENGTH];	// pretty sure this needs to be an instruction pointer array		|| obsolete as well.
 
+// holds indexes for pipe-delimiting, init to 0
+int pipes[MAX_DATA_STACK_HEIGHT];
+
 // output mega strings (might go 2-d later on)
 char ** output_one;
 char * output_two = {"\t\tpc\tbp\tsp\tregisters\nInitial values\t"};
@@ -297,6 +300,7 @@ int do_operation(instruction instr) {
         case 02:
             // RTN, 0, 0, 0
             // Operation to be performed on the data at the top of the stack
+            pipes[BP] = 0;
             SP = BP - 1;
             BP = stack[SP + 3];
             PC = stack[SP + 4];
@@ -315,6 +319,10 @@ int do_operation(instruction instr) {
             // CAL, 0, L, M
             // Call procedure at code index M
             // Generate new activation record and pc <- M
+            
+            // notate pipe
+            pipes[SP + 1] = 1;
+            
             stack[SP + 1] = 0;
             stack[SP + 2] = base(L, BP);
             stack[SP + 3] = BP;
@@ -410,7 +418,7 @@ void update_output_one(char * OP, int R, int L, int M, int i) {
 }
 
 void update_output_two() {
-	char tmp[3];
+	char tmp[6];
 	int i;
 
 	// update the registers
@@ -434,7 +442,11 @@ void update_output_two() {
 	// update the stack
 	output_two = dynamic_strcat(output_two, "Stack:");
 	for (i = 1; i < SP+1; i++) {
-		sprintf(tmp, " %d", stack[i]);
+	    if (pipes[i] == 1) {
+	        sprintf(tmp, " | %d", stack[i]);
+	    } else {
+		    sprintf(tmp, " %d", stack[i]);
+	    }
 		output_two = dynamic_strcat(output_two, tmp);		
 	}
 	output_two = dynamic_strcat(output_two, "\n\n");		
@@ -550,6 +562,11 @@ int main(void) {
     for (int i = 0; i < REG_FILE_LENGTH; i++) {
         REG[i] = 0;
     }
+    
+    // init pipes
+    for (int i = 0; i < MAX_DATA_STACK_HEIGHT; i++) {
+        pipes[i] = 0;
+    }
 
 	FILE *fp = fopen("input.txt", "r");
 	if (fp == NULL) {
@@ -587,6 +604,7 @@ int main(void) {
 	fclose(fp);
 	free(text);
 	free(output_one);
+    
 	return 0;
 }
 
