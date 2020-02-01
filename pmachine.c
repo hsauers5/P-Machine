@@ -96,7 +96,7 @@ int base(int l, int base) {
   int b1; 
   b1 = base; 
   while (l > 0) {
-    b1 = stack[b1 - 1];
+    b1 = stack[b1 + 1];
     l--;
   }
   return b1;
@@ -396,8 +396,10 @@ char * dynamic_strcat(char * base, char * added) {
 void update_output_one(char * OP, int R, int L, int M, int i) {
 	char tmp[3];
 	output_one[i] = dynamic_strcat(output_one[i], OP);
+	
 	sprintf(tmp, "\t%d", R);
 	output_one[i] = dynamic_strcat(output_one[i], tmp);
+	
 	sprintf(tmp, " %d", L);
 	output_one[i] = dynamic_strcat(output_one[i], tmp);
 
@@ -425,12 +427,13 @@ void update_output_two() {
 		sprintf(tmp, "%d ", REG[i]);
 		output_two = dynamic_strcat(output_two, tmp);
 	}
+	
 	sprintf(tmp, "%d\n", REG[REG_FILE_LENGTH - 1]);
 	output_two = dynamic_strcat(output_two, tmp);
 
 	// update the stack
 	output_two = dynamic_strcat(output_two, "Stack:");
-	for (i = 0; i < SP; i++) {
+	for (i = 1; i < SP+1; i++) {
 		sprintf(tmp, " %d", stack[i]);
 		output_two = dynamic_strcat(output_two, tmp);		
 	}
