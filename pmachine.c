@@ -1,4 +1,6 @@
-// TODO: add a | for each function in output stack
+// Alex Ogilbee, Harry Sauers
+// COP 3402, Spring 2020
+// HW1: PM/0, pmachine.c
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,12 +15,11 @@
 int stack[MAX_DATA_STACK_HEIGHT];
 
 int lex[MAX_LEXI_LEVEL];
-int code[MAX_CODE_LENGTH];	// pretty sure this needs to be an instruction pointer array		|| obsolete as well.
 
 // holds indexes for pipe-delimiting, init to 0
 int pipes[MAX_DATA_STACK_HEIGHT];
 
-// output mega strings (might go 2-d later on)
+// output mega strings (one is array of strings, two is mega-string)
 char ** output_one;
 char * output_two = {"\t\tpc\tbp\tsp\tregisters\nInitial values\t"};
 
@@ -26,63 +27,16 @@ void update_output_one(char * OP, int R, int L, int M, int i);
 void update_output_two();
 char * dynamic_strcat(char * base, char * added);
 char * convert_tabs_to_spaces(char * str);
-// strangely: if halt is false then program should halt, else continue
+
 int halt = 0;
 
 // registers
 int PC = 0;
 int IR = 0;
-
-int REG[REG_FILE_LENGTH];
-
-/* Begin Stack */
-/* ===========================================*/
-// these are also registers
 int BP = 1; // base pointer
 int SP = 0; // stack pointer
 
-int stack_is_empty(void) {
-    if (SP == BP) {
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-int stack_is_full(void) {
-    if (SP == MAX_DATA_STACK_HEIGHT) {
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-int stack_peek(void) {
-    return stack[SP];
-}
-
-int stack_pop(void) {
-    if (!stack_is_empty()) {
-        int tmp = stack[SP];
-        SP -= 1;
-        return tmp;
-    } else {
-        printf("Stack is empty!");
-    }
-}
-
-int stack_push(int data) {
-    if (!stack_is_full()) {
-        SP += 1;
-        stack[SP] = data;
-        return 1;
-    } else {
-        printf("Stack is full!");
-        return 0;
-    }
-}
-/* End Stack */
-
+int REG[REG_FILE_LENGTH];
 
 /* Begin P-Machine */
 // instruction format from file is {OP LEVEL M} space-separated.
@@ -121,101 +75,55 @@ int MATH(int OP, int R, int L, int M) {
     switch(OP) {
         case 12:
             // NEG
-            // stack[SP] = -stack[SP];
             	REG[R] = -REG[L];
             break;
         case 13:
             // ADD
-            /* SP += 1;
-            stack[SP] = stack[SP] + stack[SP - 1]; */
             	REG[R] = REG[L] + REG[M];
             break;
         case 14: 
             // SUB
-            /* 
-            SP += 1;
-            stack[SP] = stack[SP] - stack[SP - 1];
-            */
             	REG[R] = REG[L] - REG[M];
             break;
         case 15:
             // MUL
-            /*
-            SP += 1;
-            stack[SP] = stack[SP] * stack[SP - 1];
-            */
             	REG[R] = REG[L] * REG[M];
             break;
         case 16:
             // DIV
-            /*
-            SP += 1;
-            stack[SP] = stack[SP] / stack[SP - 1];
-            */
             	REG[R] = REG[L] / REG[M];
             break;
         case 17:
             // ODD
-            // @TODO_done: I cannot make sense of this pseudocode. 
-            // stack[sp] = stack[sp] mod 2) or ord(odd(stack[sp]))
-          	// stack[SP] = stack[SP] % 2;
             	REG[R] = REG[R] % 2;
             break;
         case 18:
             // MOD
-            /*
-            SP += 1;
-            stack[SP] = stack[SP] % stack[SP - 1];
-            */
             	REG[R] = REG[L] % REG[M];
             break;
         case 19:
             // EQL
-            /*
-            SP += 1;
-            stack[SP] = stack[SP] == stack[SP - 1];
-            */
-            	REG[R] = REG[L] == REG[M];
+            	REG[R] = (REG[L] == REG[M]);
             break;
         case 20:
             // NEQ
-            /*
-            SP += 1;
-            stack[SP] = stack[SP] != stack[SP - 1];
-            */
-            	REG[R] = REG[L] != REG[M];
+            	REG[R] = (REG[L] != REG[M]);
             break;
         case 21:
             // LSS
-            /*
-            SP += 1;
-            stack[SP] = stack[SP] < stack[SP - 1];
-            */
-            	REG[R] = REG[L] < REG[M];
+            	REG[R] = (REG[L] < REG[M]);
             break;
         case 22:
             // LEQ
-            /*
-            SP += 1;
-            stack[SP] = stack[SP] <= stack[SP - 1];
-            */
-            	REG[R] = REG[L] <= REG[M];
+            	REG[R] = (REG[L] <= REG[M]);
             break;
         case 23:
             // GTR
-            /*
-            SP += 1;
-            stack[SP] = stack[SP] > stack[SP - 1];
-            */
-            	REG[R] = REG[L] > REG[M];
+            	REG[R] = (REG[L] > REG[M]);
             break;
         case 24:
             // GEQ
-            /*
-            SP += 1;
-            stack[SP] = stack[SP] >= stack[SP - 1];
-            */
-            	REG[R] = REG[L] >= REG[M];
+            	REG[R] = (REG[L] >= REG[M]);
             break;
     }
 }
@@ -307,12 +215,14 @@ int do_operation(instruction instr) {
             break;
         case 03:
             // LOD, R, L, M
-            // Load value to top of stack from the stack location at offset M from L lexicographical levels down
+            // Load value to top of stack from the stack location at offset M
+			// from L lexicographical levels down
             REG[R] = stack[base(L, BP) + M];
             break;
         case 04: 
             // STO, R, L, M
-            // Store value at top of stack in the stack location at offset M from L lexi levels down
+            // Store value at top of stack in the stack location at offset M
+			// from L lexi levels down
         	stack[base(L, BP) + M] = REG[R];
             break;
         case 05:
