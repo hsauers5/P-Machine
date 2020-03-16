@@ -254,7 +254,7 @@ int do_operation(instruction instr) {
         case 8:
             // JPC, R, 0, M
             // Jump to instruction M if top stack element == 0
-            if (stack[SP] == 0) {
+            if (REG[R] == 0) {
                 PC = M;
             }
             break;
@@ -478,7 +478,7 @@ int main(void) {
         pipes[i] = 0;
     }
 
-	FILE *fp = fopen("input.txt", "r");
+	FILE *fp = fopen("factorial.txt", "r");
 	if (fp == NULL) {
 		printf("Error: Could not locate file.\n");
 		exit(-1);
@@ -499,6 +499,8 @@ int main(void) {
 	// instruction fetch and execute
 	update_output_two();
 	while(!halt) {
+		if (halt)
+			break;
 		do_operation(text[PC]);
 	}
 
